@@ -5,16 +5,14 @@ const getUrl = (req) =>
 
 module.exports = {
   all: (req, res) => {
-    db.Personaje.findAll({
-      include: [{ association: "films", include: ["genre"] }],
-    })
-      .then(personaje => {
+    db.Personaje.findAll({attributes: ['imagen', 'nombre']})
+      .then(personajes => {
         res.status(200).json({
           meta: {
             endPoint: getUrl(req),
-            total: personaje.length,
+            total: personajes.length,
           },
-          data: personaje,
+          data: personajes
         });
       })
       .catch((error) => res.status(400).send(error));

@@ -1,12 +1,13 @@
 const db =  require('../database/models')
+const jwt = require('jsonwebtoken')
 const getUrl = (req) =>
   req.protocol + "://" + req.get("host") + req.originalUrl;
 
 module.exports = {
     all: (req, res) => {
         db.Film.findAll({
-            include : [{association : 'personajes'}, {association: 'genre'}]
-          })
+          attributes: ['imagen', 'titulo', 'fechaCreacion']
+        })
           .then(result => {
             if(result !== 0){
               res.status(200).json({
@@ -74,22 +75,29 @@ module.exports = {
         calificacion,
         genero
       } = req.body;
-      db.Film.create({
-        imagen,
-        titulo,
-        fechaCreacion,
-        calificacion,
-        genero
+      jwt.verify(req.token, 'secretkey', (error, authData) =>{
+        if(error){
+          res.sendStatus(403);
+        }else{
+          db.Film.create({
+            imagen,
+            titulo,
+            fechaCreacion,
+            calificacion,
+            genero
+          })
+          .then((movie) => {
+            res.status(201).json({
+              meta: {
+                endPoint: getUrl(req),
+                msg: "Pelicula agregada",
+              },
+              data: movie,
+              authData
+            });
+          }).catch(error => res.status(400).send(error));
+        }
       })
-      .then(result => {
-        res.status(201).json({
-          meta: {
-            endPoint: getUrl(req),
-            msg: "Pelicula agregada",
-          },
-          data: result,
-        });
-      }).catch(error => res.status(400).send(error));
     },
     edit: (req, res) => {
       const {
@@ -99,25 +107,35 @@ module.exports = {
         calificacion,
         genero,
       } = req.body;
-      db.Film.update(
-        {
-          imagen,
-          titulo,
-          fechaCreacion,
-          calificacion,
-          genero,
-        },
-        {
-          where: {
-            id: req.params.id,
+      jwt.verify(req.token, 'secretkey', (error, authData) => {
+        if(error){
+          //res.json(error)
+          res.sendStatus(403);
+        }else{
+          db.Film.update(
+          {
+            imagen,
+            titulo,
+            fechaCreacion,
+            calificacion,
+            genero,
           },
+          {
+            where: {
+              id: req.params.id,
+            },
+          }
+        ).then(movie =>
+          res.status(201).json({
+            msg: "Pelicula actualizada",
+            movie,
+            authData
+          })
+        )
+        .catch(error => res.status(400).send(error))
         }
-      ).then(() =>
-        res.status(201).json({
-          msg: "Film actualizado",
-        })
-      )
-      .catch(error => res.status(400).send(error))
+      })
+      
     },
     delete: (req, res) => {
       db.films_personajes

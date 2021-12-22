@@ -1,13 +1,14 @@
 let express = require('express');
 let router = express.Router();
-let filmController = require('../controllers/filmController')
+let moviesController = require('../controllers/moviesController')
+let verifyToken = require('../middlewares/verifyToken');
 
-router.get('/', filmController.all);
-router.get('/:id', filmController.one);
-router.post('/add', filmController.add)
-router.put('/edit/:id', filmController.edit)
-router.delete('/delete/:id', filmController.delete)
-router.get('/search/:title', filmController.search)
+router.get('/', moviesController.all);
+router.get('/:id', moviesController.one);
+router.post('/add', verifyToken, moviesController.add)
+router.put('/edit/:id', verifyToken, moviesController.edit)
+router.delete('/delete/:id', verifyToken, moviesController.delete)
+router.get('/search/:title', moviesController.search)
 
 
 module.exports = router;
