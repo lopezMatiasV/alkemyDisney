@@ -9,11 +9,11 @@ module.exports = function(sequelize, dataTypes) {
             primaryKey: true,
             autoIncrement: true
         },
-        personajeId: {
+        personaje_id: {
             type: dataTypes.INTEGER.UNSIGNED,
             allowNull : false
         },
-        filmId: {
+        film_id: {
             type: dataTypes.INTEGER.UNSIGNED,
             allowNull : false
         },
@@ -21,8 +21,7 @@ module.exports = function(sequelize, dataTypes) {
 
     let config = {
         tableName: "films_personajes",
-        timestamps: true,
-        underscored: true
+        timestamps: false
     }
 
     let film_personaje = sequelize.define(alias, cols, config)

@@ -40,7 +40,7 @@ module.exports = {
       } else {
         db.Film.findOne({
           where: { id: req.params.id },
-          include: [{ association: "personajes" }, { association: "genre" }],
+          include: [{ association: "personajes" }],
         }).then(result => {
           if (result) {
             return res.status(200).json({
@@ -138,25 +138,51 @@ module.exports = {
       
     },
     delete: (req, res) => {
-      db.films_personajes
-      .destroy({
-        where: {
-          filmId: req.params.id,
-        },
-      })
-      .then(
-        db.Film.destroy({
-          where: {
-            id: req.params.id,
-          },
-        })
-          .then(() => {
-            return res.status(201).json({
-              msg: "Film eliminado",
-            });
+      jwt.verify(req.token, 'secretkey', (error, authData) => {
+        if(error){
+          res.sendStatus(403);
+        }else{
+          let moviesResult = db.film_personaje.findAll({
+            where: {
+              film_id: req.params.id,
+            },
           })
-          .catch((err) => res.status(400).send(err))
-      );
+          if(moviesResult.length == 0){
+            db.Film.destroy({
+              where: {
+                id: req.params.id,
+              },
+            })
+              .then(() => {
+                return res.status(201).json({
+                  msg: "Pelicula eliminada",
+                  authData
+                });
+              })
+              .catch((err) => res.status(400).send(err))
+          }else{
+            db.film_personaje.destroy({
+            where: {
+              film_id: req.params.id,
+            },
+            })
+          .then(() => {
+            db.Film.destroy({
+              where: {
+                id: req.params.id,
+              },
+            })
+              .then(() => {
+                return res.status(201).json({
+                  msg: "Pelicula eliminada",
+                  authData
+                });
+              })
+              .catch((err) => res.status(400).send(err))
+          });
+          }
+        }
+      })
     },
     search: (req, res) =>{
       db.Film.findAll({

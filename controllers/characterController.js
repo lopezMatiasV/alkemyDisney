@@ -19,7 +19,7 @@ module.exports = {
   },
   one: (req, res) => {
     db.Personaje.findByPk(req.params.id, {
-      include: [{ association: "films", include: ["genre"] }],
+      include: [{ association: "films"}],
     })
       .then((personaje) => {
         res.status(200).json({
@@ -94,12 +94,12 @@ module.exports = {
       if(error){
         res.sendStatus(403);
       }else{
-        /* db.film_personaje.destroy({
+        let personajesResult = db.film_personaje.findAll({
           where: {
-            personajeId: req.params.id,
+            personaje_id: req.params.id,
           },
         })
-        .then( */
+        if(personajesResult.length == 0){
           db.Personaje.destroy({
             where: {
               id: req.params.id,
@@ -112,10 +112,29 @@ module.exports = {
               });
             })
             .catch((err) => res.status(400).send(err))
-        //);
+        }else{
+          db.film_personaje.destroy({
+          where: {
+            personaje_id: req.params.id,
+          },
+          })
+        .then(() => {
+          db.Personaje.destroy({
+            where: {
+              id: req.params.id,
+            },
+          })
+            .then(() => {
+              return res.status(201).json({
+                msg: "Personaje y eliminado",
+                authData
+              });
+            })
+            .catch((err) => res.status(400).send(err))
+        });
+        }
       }
     })
-    
   },
   search: (req, res) =>{
     db.Personaje.findAll({

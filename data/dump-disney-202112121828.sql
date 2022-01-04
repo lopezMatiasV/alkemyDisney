@@ -52,8 +52,8 @@ DROP TABLE IF EXISTS `films_personajes`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `films_personajes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `personajeId` int(11) NOT NULL,
-  `filmId` int(11) NOT NULL,
+  `personaje_id` int(11) NOT NULL,
+  `film_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `film_personaje_FK` FOREIGN KEY (`id`) REFERENCES `personajes` (`id`),
   CONSTRAINT `film_personaje_FK_1` FOREIGN KEY (`id`) REFERENCES `films` (`id`)
